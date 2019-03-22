@@ -152,6 +152,10 @@ public class CharacterController2D : MonoBehaviour
                 }
             }
 
+
+            Debug.Log(move);
+            Debug.Log("Movement speed");
+
             // Move the character by finding the target velocity
             Vector3 targetVelocity = new Vector2(move * 10f, m_Rigidbody2D.velocity.y);
             // And then smoothing it out and applying it to the character
@@ -192,7 +196,7 @@ public class CharacterController2D : MonoBehaviour
         transform.localScale = theScale;
     }
 
-    public bool getIsWallsliding()
+    public bool GetIsWallsliding()
     {
         return isWallSliding;
     }
