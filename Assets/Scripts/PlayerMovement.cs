@@ -1,21 +1,19 @@
-﻿using System.Collections;
+﻿
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
     public CharacterController2D controller;
+    public Text debugText;
     public float runSpeed = 70f;
-    
-    float horizontalMove = 1f;
-    float verticalMove = 0f;
-    float horizontalDirection = 1f;
 
     private Vector3 fp;   //First touch position
     private Vector3 lp;   //Last touch position
     private float dragDistance;  //minimum distance for a swipe to be registered
 
-    bool isCrouching = false;
     bool isJumping = false;
     bool jumpedLeft = false;
     bool jumpedRight = false;
@@ -28,39 +26,21 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         dragDistance = Screen.height * 15 / 100; //dragDistance is 15% height of the screen
-        // horizontalDirection = horizontalMove * runSpeed;
     }
 
     // Update is called once per frame
     void Update()
     {
-        /*
-        horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
+
         isJumping = Input.GetKeyDown(jumpPressed);
         jumpedLeft = Input.GetKeyDown(left);
-        jumpedRight = Input.GetKeyDown(right);
+        jumpedRight = Input.GetKey(right);
 
-        playerTouch = Input.GetTouch(1);
- 
-        if (horizontalMove != 0)
-        {
-            horizontalDirection = horizontalMove;
-        }
+        debugText.text = "jumpedRight: " + jumpedRight + " jumpedLeft: " + jumpedLeft + " isJumping: " + isJumping;
 
-        if (verticalMove < 0)
-        {
-            isCrouching = true;
-        }
-        else
-        {
-            isCrouching = false;
-        }
+        controller.Move(runSpeed * Time.fixedDeltaTime, (jumpedRight || jumpedLeft), isJumping);
 
-        
-        isJumping = false;
-
-    */
-
+        /*
         if (Input.touchCount == 1) // user is touching the screen with a single touch
         {
             Touch touch = Input.GetTouch(0); // get the touch
@@ -86,22 +66,27 @@ public class PlayerMovement : MonoBehaviour
                         if ((lp.x > fp.x))  //If the movement was to the right)
                         {   //Right swipe
                             Debug.Log("Right Swipe");
-                            controller.Move(runSpeed * Time.fixedDeltaTime, isCrouching, isJumping);
+                            debugText.text = "Swipe right";
+                            controller.Move(runSpeed * Time.fixedDeltaTime, true, false);
                         }
                         else
                         {   //Left swipe
-                            controller.Move(-(runSpeed * Time.fixedDeltaTime), isCrouching, isJumping);
+                            debugText.text = "Swipe left";
+                            controller.Move(runSpeed * Time.fixedDeltaTime, true, false);
                         }
                     }
                     else
                     {   //the vertical movement is greater than the horizontal movement
                         if (lp.y > fp.y)  //If the movement was up
                         {   //Up swipe
-                            controller.Move(0 * Time.fixedDeltaTime, isCrouching, true);
+                            debugText.text = "Swipe up";
+                            controller.Move(0 * Time.fixedDeltaTime, false, true);
                         }
                         else
                         {   //Down swipe
-                            controller.Move(0 * Time.fixedDeltaTime, true, isJumping);
+                            debugText.text = "swipe down";
+                            // Maybe implement something on down swipe if needed
+                            //controller.Move(0 * Time.fixedDeltaTime, true, isJumping);
                         }
                     }
                 }
@@ -111,6 +96,9 @@ public class PlayerMovement : MonoBehaviour
                 }
             }
         }
+
+        controller.Move(runSpeed * Time.fixedDeltaTime, false, false);
+        */
     }
 
     void FixedUpdate()

@@ -25,6 +25,8 @@ public class CharacterController2D : MonoBehaviour
     private RaycastHit2D m_wallCheckHit;
     private bool isWallSliding = false;
 
+    // procentage is always 1.x;
+
     [Header("Events")]
     [Space]
 
@@ -39,7 +41,7 @@ public class CharacterController2D : MonoBehaviour
     void Update()
     {
         // Check if wallSlide
-        if (m_wallCheckHit && m_Rigidbody2D.velocity.y <= 0 && !m_Grounded)
+        if (m_wallCheckHit)
         {
             isWallSliding = true;
         }
@@ -47,9 +49,6 @@ public class CharacterController2D : MonoBehaviour
         {
             isWallSliding = false;
         }
-
-        Debug.Log("Wallsliding fucker");
-        Debug.Log(isWallSliding);
 
         bool wasGrounded = m_Grounded;
         m_Grounded = false;
@@ -68,15 +67,6 @@ public class CharacterController2D : MonoBehaviour
             else
             {
                 m_Grounded = false;
-            }
-        }
-
-        // Clamp y velocity
-        if (isWallSliding)
-        {
-            if (m_Rigidbody2D.velocity.y > -m_MaxWallSlideVelocity)
-            {
-                m_Rigidbody2D.velocity = new Vector2(m_Rigidbody2D.velocity.x, -m_MaxWallSlideVelocity);
             }
         }
 
@@ -106,9 +96,9 @@ public class CharacterController2D : MonoBehaviour
 
     }
 
-
-    public void Move(float move, bool crouch, bool jump)
+    public void Move(float move, bool changeWall, bool jump)
     {
+        /*
         // If crouching, check to see if the character can stand up
         if (!crouch)
         {
@@ -118,69 +108,66 @@ public class CharacterController2D : MonoBehaviour
                 crouch = true;
             }
         }
+        */
 
-        //only control the player if grounded or airControl is turned on
-        if (m_Grounded || m_AirControl)
+        Debug.Log(move);
+        Debug.Log("Movement speed");
+
+        // Move the character by finding the target velocity
+        Vector3 targetVelocity = new Vector2(m_Rigidbody2D.velocity.x, move * 10f);
+        // And then smoothing it out and applying it to the character
+        m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
+
+
+        /*
+        // If the input is moving the player right and the player is facing left...
+        if (move > 0 && !m_FacingRight)
         {
+            // ... flip the player.
+            Flip();
+        }
+        // Otherwise if the input is moving the player left and the player is facing right...
+        else if (move < 0 && m_FacingRight)
+        {
+            // ... flip the player.
+            Flip();
+        }
+        */
 
-            // If crouching
-            if (crouch)
+        // If the player should jump...
+        if (jump)
+        {
+            // Add a vertical force to the player.
+            m_Rigidbody2D.AddForce(new Vector2(m_Rigidbody2D.velocity.x, move + m_JumpForce));
+        }
+
+        if (changeWall)
+        {
+            // add horizontal force to jump to other wall
+            if (m_FacingRight)
             {
-                if (!m_wasCrouching)
-                {
-                    m_wasCrouching = true;
-                    OnCrouchEvent.Invoke(true);
-                }
-
-                // Reduce the speed by the crouchSpeed multiplier
-                move *= m_CrouchSpeed;
-
-                // Disable one of the colliders when crouching
-                if (m_CrouchDisableCollider != null)
-                    m_CrouchDisableCollider.enabled = false;
-            }
-            else
+                m_Rigidbody2D.AddForce(new Vector2((move + m_JumpForce), m_Rigidbody2D.velocity.y));
+            } else
             {
-                // Enable the collider when not crouching
-                if (m_CrouchDisableCollider != null)
-                    m_CrouchDisableCollider.enabled = true;
-
-                if (m_wasCrouching)
-                {
-                    m_wasCrouching = false;
-                    OnCrouchEvent.Invoke(false);
-                }
-            }
-
-
-            Debug.Log(move);
-            Debug.Log("Movement speed");
-
-            // Move the character by finding the target velocity
-            Vector3 targetVelocity = new Vector2(move * 10f, m_Rigidbody2D.velocity.y);
-            // And then smoothing it out and applying it to the character
-            m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
-
-            // If the input is moving the player right and the player is facing left...
-            if (move > 0 && !m_FacingRight)
-            {
-                // ... flip the player.
-                Flip();
-            }
-            // Otherwise if the input is moving the player left and the player is facing right...
-            else if (move < 0 && m_FacingRight)
-            {
-                // ... flip the player.
-                Flip();
+                m_Rigidbody2D.AddForce(new Vector2(-(move + m_JumpForce), m_Rigidbody2D.velocity.y));
             }
         }
 
-        // If the player should jump...
-        if ((m_Grounded && jump) || (isWallSliding && jump))
+        if (m_FacingRight)
         {
-            // Add a vertical force to the player.
-            m_Grounded = false;
-            m_Rigidbody2D.AddForce(new Vector2(m_Rigidbody2D.velocity.x, m_JumpForce));
+            m_wallCheckHit = Physics2D.Raycast(m_WallCheck.position, m_WallCheck.right, m_wallCheckDistance, m_WhatIsWall);
+            if (m_wallCheckHit)
+            {
+                Flip();
+            }
+        }
+        else
+        {
+            m_wallCheckHit = Physics2D.Raycast(m_WallCheck.position, -m_WallCheck.right, m_wallCheckDistance, m_WhatIsWall);
+            if (m_wallCheckHit)
+            {
+                Flip();
+            }
         }
     }
 
