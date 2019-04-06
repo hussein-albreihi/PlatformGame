@@ -25,13 +25,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
-        dragDistance = Screen.height * 15 / 100; //dragDistance is 15% height of the screen
+        dragDistance = Screen.height * 10 / 100; //dragDistance is 15% height of the screen
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        /*
+         * this section is for debugging on PC
+         */
         isJumping = Input.GetKeyDown(jumpPressed);
         jumpedLeft = Input.GetKeyDown(left);
         jumpedRight = Input.GetKey(right);
@@ -40,7 +42,7 @@ public class PlayerMovement : MonoBehaviour
 
         controller.Move(runSpeed * Time.fixedDeltaTime, (jumpedRight || jumpedLeft), isJumping);
 
-        /*
+
         if (Input.touchCount == 1) // user is touching the screen with a single touch
         {
             Touch touch = Input.GetTouch(0); // get the touch
@@ -67,12 +69,12 @@ public class PlayerMovement : MonoBehaviour
                         {   //Right swipe
                             Debug.Log("Right Swipe");
                             debugText.text = "Swipe right";
-                            controller.Move(runSpeed * Time.fixedDeltaTime, true, false);
+                            controller.Move((runSpeed * 1.2f) * Time.fixedDeltaTime, true, false);
                         }
                         else
                         {   //Left swipe
                             debugText.text = "Swipe left";
-                            controller.Move(runSpeed * Time.fixedDeltaTime, true, false);
+                            controller.Move((runSpeed * 1.2f) * Time.fixedDeltaTime, true, false);
                         }
                     }
                     else
@@ -80,7 +82,7 @@ public class PlayerMovement : MonoBehaviour
                         if (lp.y > fp.y)  //If the movement was up
                         {   //Up swipe
                             debugText.text = "Swipe up";
-                            controller.Move(0 * Time.fixedDeltaTime, false, true);
+                            controller.Move(0, false, true);
                         }
                         else
                         {   //Down swipe
@@ -93,12 +95,10 @@ public class PlayerMovement : MonoBehaviour
                 else
                 {   //It's a tap as the drag distance is less than 20% of the screen height
                     Debug.Log("Tap");
+                    controller.Move((runSpeed * 1.05f) * Time.fixedDeltaTime, true, false);
                 }
             }
         }
-
-        controller.Move(runSpeed * Time.fixedDeltaTime, false, false);
-        */
     }
 
     void FixedUpdate()
